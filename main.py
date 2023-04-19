@@ -70,7 +70,7 @@ async def play(ctx, url):
             filename, data = await PytubeSource.from_url(url, loop=bot.loop)
             voice_channel.play(discord.FFmpegPCMAudio(
             executable="F:\\Mobius Discord Bot\\ffmpeg-2023-04-17-git-65e537b833-full_build\\bin\\ffmpeg.exe", source=filename),
-            after=lambda e: os.remove(filename) if os.path.isfilename(filename) else None
+            after=lambda e: os.remove(filename) if os.path.isfile(filename) else None
         )
         except:
             print('Exception occurred')

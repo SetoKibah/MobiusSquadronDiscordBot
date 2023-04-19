@@ -4,39 +4,17 @@ from discord.ext import commands,tasks
 import os
 from dotenv import load_dotenv
 import youtube_dl
-
+from pytube import YouTube
 
 load_dotenv()
 # Get the API token from the .env file.
-DISCORD_TOKEN = os.getenv("discord_token")
+DISCORD_TOKEN = os.getenv("")
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!',intents=intents)
 
-
-youtube_dl.utils.bug_reports_message = lambda: ''
-
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
-}
-
-ffmpeg_options = {
-    'options': '-vn'
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
-class YTDLSource(discord.PCMVolumeTransformer):
+class PytubeSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
         super().__init__(source, volume)
         self.data = data
@@ -46,23 +24,35 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
-        filename = data['title'] if stream else ytdl.prepare_filename(data)
-        return filename
+        ytb = YouTube(url)
+        data = {'title': ytb.title}
+        filename = ytb.streams.filter(only_audio=True, file_extension='mp4').first().download(skip_existing=True)
+        return filename, data
     
-@bot.command(name='play_song', help='To play song')
-async def play(ctx,url):
-    server = ctx.message.guild
-    voice_channel = server.voice_client
-    async with ctx.typing():
-        filename = await YTDLSource.from_url(url, loop=bot.loop)
-        voice_channel.play(discord.FFmpegPCMAudio(executable = "C:\\Users\\abhisar.ahuja\\Documents\\ffmpeg\\ffmpeg.exe", source=filename))
-    await ctx.send('**Now playing:** {}'.format(filename))
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
 
+        def fetch_data():
+            try:
+                ytb = YouTube(url)
+                data = {'title': ytb.title}
+                filename = ytb.streams.filter(only_audio=True, file_extension='mp4').first().download(skip_existing=True)
+                return filename, data
+            except Exception as e:
+                print(f"Error occurred while fetching data: {e}")
+                return None, None
 
+        filename, data = await loop.run_in_executor(None, fetch_data)
+        if filename and data:
+            return filename, data
+        else:
+            raise Exception("Error occurred while fetching data from YouTube")
+
+ffmpeg_options = {
+    'options': '-vn'
+}
+    
 @bot.command(name='join', help='Tells the bot to join the voice channel')
 async def join(ctx):
     if not ctx.message.author.voice:
@@ -72,6 +62,16 @@ async def join(ctx):
         channel = ctx.message.author.voice.channel
     await channel.connect()
 
+@bot.command(name='play_song', help='To play song')
+async def play(ctx, url):
+    server = ctx.message.guild
+    voice_channel = server.voice_client
+    async with ctx.typing():
+        filename, data = await PytubeSource.from_url(url, loop=bot.loop)
+        voice_channel.play(discord.FFmpegPCMAudio(
+            executable="F:\\Mobius Discord Bot\\ffmpeg-2023-04-17-git-65e537b833-full_build\\bin\\ffmpeg.exe", source=filename))
+
+    await ctx.send('**Now playing:** {}'.format(data['title']))
 
 @bot.command(name='pause', help='This command pauses the song')
 async def pause(ctx):
@@ -111,4 +111,4 @@ async def stop(ctx):
 
 
 if __name__ == "__main__" :
-    bot.run("Paste your own discord bot token")
+    bot.run("")

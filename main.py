@@ -3,7 +3,6 @@ import discord
 from discord.ext import commands,tasks
 import os
 from dotenv import load_dotenv
-import youtube_dl
 from pytube import YouTube
 
 load_dotenv()
@@ -67,10 +66,16 @@ async def play(ctx, url):
     server = ctx.message.guild
     voice_channel = server.voice_client
     async with ctx.typing():
-        filename, data = await PytubeSource.from_url(url, loop=bot.loop)
-        voice_channel.play(discord.FFmpegPCMAudio(
-            executable="F:\\Mobius Discord Bot\\ffmpeg-2023-04-17-git-65e537b833-full_build\\bin\\ffmpeg.exe", source=filename))
-
+        try:
+            filename, data = await PytubeSource.from_url(url, loop=bot.loop)
+            voice_channel.play(discord.FFmpegPCMAudio(
+            executable="F:\\Mobius Discord Bot\\ffmpeg-2023-04-17-git-65e537b833-full_build\\bin\\ffmpeg.exe", source=filename),
+            after=lambda e: os.remove(filename) if os.path.isfilename(filename) else None
+        )
+        except:
+            print('Exception occurred')
+            await ctx.send('Issue occurred downloading song. Please wait 10 seconds and try again...')
+            
     await ctx.send('**Now playing:** {}'.format(data['title']))
 
 @bot.command(name='pause', help='This command pauses the song')

@@ -7,7 +7,7 @@ from pytube import YouTube
 
 load_dotenv()
 # Get the API token from the .env file.
-DISCORD_TOKEN = os.getenv("")
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
@@ -116,4 +116,4 @@ async def stop(ctx):
 
 
 if __name__ == "__main__" :
-    bot.run("")
+    bot.run(DISCORD_TOKEN)

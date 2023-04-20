@@ -18,5 +18,5 @@ A simple, easy-to-use Discord music bot that allows users to play audio from You
 ## Commands
 - '!join': Joins the user's voice channel.
 - '!leave': Leaves the current voice channel.
--'!play <YouTube_URL>': Plays audio from the provided YouTube URL.
--'!stop': Stops the audio playback and clears the queue.
+- '!play <YouTube_URL>': Plays audio from the provided YouTube URL.
+- '!stop': Stops the audio playback and clears the queue.

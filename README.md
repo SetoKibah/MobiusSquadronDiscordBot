@@ -12,7 +12,7 @@ A simple, easy-to-use Discord music bot that allows users to play audio from You
 2. Clone this repository: git clone https://github.com/yourusername/Mobius-Discord-Bot.git
 3. Change to the project directory: cd Mobius-Discord-Bot
 4. Install the required dependencies: pip install -r requirements.txt
-5. Add your Discord bot token to the config.py file.
+5. Create a .env file and add your Bot Token (DISCORD_TOKEN=<your token here>).
 6. Run the bot: python main.py
 
 ## Commands

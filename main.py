@@ -8,7 +8,7 @@ from pytube import YouTube
 load_dotenv()
 # When API tokens are top-secret codes that should never see the light of day
 # We stash it in the .env file like pirates hiding their treasure
-DISCORD_TOKEN = os.getenv("")
+DISCORD_TOKEN = os.getenv("Token")
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
@@ -130,4 +130,4 @@ async def stop(ctx):
 # "The story so far: In the beginning the Universe was created. This has made a lot of people very angry and been widely regarded as a bad move."
 if __name__ == "__main__" :
     # Make
-    bot.run("")
+    bot.run(DISCORD_TOKEN)
